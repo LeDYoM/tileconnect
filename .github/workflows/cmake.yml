@@ -17,13 +17,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Configure CMake for preset ${{env.preset_name}}
-      run: cmake --preset ${{env.preset_name}}
+    - name: Configure CMake for preset ${{matrix.preset_name}}
+      run: cmake --preset ${{matrix.preset_name}}
 
-    - name: Build configuration ${{env.preset_name}}_${{matrix.build_types}}
+    - name: Build configuration ${{matrix.preset_name}}_${{matrix.build_types}}
       # Build your program with the given configuration
-      run: cmake --build --preset ${{env.preset_name}}_${{matrix.build_types}}
+      run: cmake --build --preset ${{matrix.preset_name}}_${{matrix.build_types}}
 
-    - name: Run tests in ${{env.preset_name}}_${{matrix.build_types}}
-      working-directory: ${{github.workspace}}/preset_build/${{env.preset_name}}
+    - name: Run tests in ${{matrix.preset_name}}_${{matrix.build_types}}
+      working-directory: ${{github.workspace}}/preset_build/${{matrix.preset_name}}
       run: ctest -C ${{matrix.build_types}}
