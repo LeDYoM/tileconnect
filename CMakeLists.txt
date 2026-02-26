@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 project(
-  "Tile Connect"
+"Tile Connect"
   VERSION 0.0.1.1
   DESCRIPTION "Tile Connect"
   # [HOMEPAGE_URL <url-string>]
   LANGUAGES CXX
-  )
+)
 
-  set(ct "tile_con")
-  add_executable(${ct})
-  target_sources(${ct} PRIVATE
-    src/main.cpp)
+include(functions.cmake)
+
+add_subdirectory(src/libtc)
+add_subdirectory(src/executable)
+add_subdirectory(tests)
