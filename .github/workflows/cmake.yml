@@ -6,14 +6,14 @@ on:
       [main,develop,ghactions_dev]
 
 env:
-  preset_name: win_vs_2022_x64
 
 jobs:
-  windows-msvc-17-2022:
-    runs-on: windows-2025
+  windows-msvc:
+    runs-on: windows-latest
 
     strategy:
       matrix:
+        preset_name: [win_vs_2022_x64, win_vs_2026_x64]
         build_types: [debug, release]
 
     steps:
