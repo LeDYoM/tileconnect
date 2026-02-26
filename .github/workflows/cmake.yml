@@ -1,0 +1,31 @@
+name: CMake
+
+on:
+  push:
+    branches:
+      [main,develop,ghactions_dev]
+
+env:
+  preset_name: win_vs_2022_x64
+
+jobs:
+  windows-msvc-17-2022:
+    runs-on: windows-2025
+
+    strategy:
+      matrix:
+        build_types: [debug, release]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure CMake for preset ${{env.preset_name}}
+      run: cmake --preset ${{env.preset_name}}
+
+    - name: Build configuration ${{env.preset_name}}_${{matrix.build_types}}
+      # Build your program with the given configuration
+      run: cmake --build --preset ${{env.preset_name}}_${{matrix.build_types}}
+
+    - name: Run tests in ${{env.preset_name}}_${{matrix.build_types}}
+      working-directory: ${{github.workspace}}/preset_build/${{env.preset_name}}
+      run: ctest -C ${{matrix.build_types}}
