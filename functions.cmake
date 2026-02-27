@@ -19,6 +19,8 @@ function (prepareTestLibrary)
 
     FetchContent_MakeAvailable(Catch2)
 
+    list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+
     # Set the old value of BUILD_SHARED_LIBS
     set(BUILD_SHARED_LIBS ${PREVIOUS_BUILD_SHARED_LIBS})
     #======================================

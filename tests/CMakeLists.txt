@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 3.14)
 project(tc_utests CXX)
 
 set(ct ${PROJECT_NAME})
-
 prepareTestLibrary()
 
 add_executable(${ct})
@@ -13,3 +12,4 @@ target_sources(${ct} PRIVATE
     catch_include.hpp)
 
 target_link_libraries(${ct} PRIVATE Catch2::Catch2WithMain tc)
+add_test(NAME ${ct} COMMAND ${ct})
