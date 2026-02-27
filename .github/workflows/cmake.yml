@@ -11,7 +11,8 @@ jobs:
 
     strategy:
       matrix:
-        preset_name: [win_vs_2022_x64, win_vs_2026_x64]
+#        preset_name: [win_vs_2022_x64, win_vs_2026_x64]
+        preset_name: [win_vs_2026_x64]
         build_types: [debug, release]
 
     steps:
