@@ -3,10 +3,10 @@
 #include <limits>
 import tile_connect;
 
-TEST_CASE("Board::construct")
-{
-    using BoardInt = tc::TBoard<int>;
+using BoardInt = tc::TBoard<int>;
 
+TEST_CASE("Board::construct","[Board]")
+{
     {
         BoardInt board{3U, 4U};
 
@@ -31,6 +31,18 @@ TEST_CASE("Board::construct")
         CHECK(BIntMax == board.size().y);
         CHECK(BoardInt::SizeTuple{BIntMax, BIntMax} == board.size());
     }
+}
 
-    // Access all tokens by index.
+TEST_CASE("Board::Access Tokens by index","[Board][Token]")
+{
+    constexpr BoardInt::SizeType Size64k{1024U * 64U};
+    BoardInt board{Size64k, Size64k};
+
+    CHECK(nullptr == board[0U,0U]);
+    CHECK(nullptr == board[{0U,0U}]);
+
+    CHECK(nullptr == board[Size64k - 1U, Size64k - 1U]);
+    CHECK(nullptr == board[{Size64k - 1U, Size64k - 1U}]);
+
+    
 }
