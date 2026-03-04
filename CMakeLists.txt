@@ -8,6 +8,7 @@ project(
 )
 
 include(functions.cmake)
+testing_init()
 
 add_subdirectory(src/libtc)
 add_subdirectory(src/executable)

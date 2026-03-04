@@ -1,15 +1,16 @@
 export module board;
 
 import token;
-import<vector>;
-import<memory>;
-import<cstddef>;
-import<concepts>;
+import <vector>;
+import <memory>;
+import <cstddef>;
+import <concepts>;
 
 namespace tc
 {
 export template <typename T>
-requires std::movable<T> class TBoard : public std::enable_shared_from_this<T>
+    requires std::movable<T>
+class TBoard : public std::enable_shared_from_this<T>
 {
 public:
     using TileContent      = typename std::shared_ptr<T>;
@@ -40,7 +41,7 @@ public:
         return m_tokens[fromCoords(x, y)];
     }
 
-    TileContent operator[](SizeType const x, SizeType const y) noexcept
+    decltype(auto) operator[](SizeType const x, SizeType const y) noexcept
     {
         return m_tokens[fromCoords(x, y)];
     }
@@ -84,7 +85,19 @@ public:
     }
 
     template <typename... Args>
-    TileContent swap_emplace(SizeType const x, SizeType const y, Args&&... args)
+    void emplace(SizeType const x, SizeType const y, Args&&... args)
+    {
+        (*this)[x, y] = std::make_shared<T>(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void emplace(SizeTuple const& size, Args&&... args)
+    {
+        emplace(size.x, size.y, std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    TileContent emplace_swap(SizeType const x, SizeType const y, Args&&... args)
     {
         TileContent content{std::make_shared<T>(std::forward<Args>(args)...)};
         std::swap(content, (*this)[x, y]);
@@ -92,31 +105,9 @@ public:
     }
 
     template <typename... Args>
-    TileContent swap_emplace(SizeTuple const& size, Args&&... args)
+    TileContent emplace_swap(SizeTuple const& size, Args&&... args)
     {
-        return swap_emplace(size.x, size.y, std::forward<Args>(args)...);
-    }
-
-    template <typename... Args>
-    void emplace(SizeType const x, SizeType const y, Args&&... args)
-    {
-        (*this)[x, y] = std::make_shared<T>(std::forward<Args>(args)...);
-    }
-
-    template <typename... Args>
-    void emplace(SizeTuple const& size, Args&&... args)
-    {
-        emplace(size.x, size.y, std::forward<Args>(args)...);
-    }
-
-    void emplace(SizeType const x, SizeType const y, Args&&... args)
-    {
-        (*this)[x, y] = std::make_shared<T>(std::forward<Args>(args)...);
-    }
-
-    void emplace(SizeTuple const& size, Args&&... args)
-    {
-        emplace(size.x, size.y, std::forward<Args>(args)...);
+        return emplace_swap(size.x, size.y, std::forward<Args>(args)...);
     }
 
 private:

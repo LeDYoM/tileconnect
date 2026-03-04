@@ -1,3 +1,14 @@
+macro(testing_init)
+  option(BUILD_TESTS "Build test programs" ON)
+  if (BUILD_TESTS)
+    message("Building tests")
+    enable_testing()
+    prepareTestLibrary()
+  else()
+    message("Not building tests")
+  endif()
+endmacro()
+
 function (prepareTestLibrary)
     include(FetchContent)
     message(STATUS "Fetching Catch2")
@@ -18,7 +29,8 @@ function (prepareTestLibrary)
     )
 
     FetchContent_MakeAvailable(Catch2)
-
+    include(CTest)
+    include(Catch)
     list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 
     # Set the old value of BUILD_SHARED_LIBS
