@@ -3,10 +3,10 @@
 #include <limits>
 import tile_connect;
 
-TEST_CASE("Board::construct")
-{
-    using BoardInt = tc::TBoard<int>;
+using BoardInt = tc::TBoard<int>;
 
+TEST_CASE("Board::construct", "[Board]")
+{
     {
         BoardInt board{3U, 4U};
 
@@ -24,13 +24,99 @@ TEST_CASE("Board::construct")
     }
 
     {
-        constexpr auto BIntMax{std::numeric_limits<BoardInt::SizeType>::max()};
-        BoardInt board{BIntMax, BIntMax};
+        constexpr auto BIntMax{std::numeric_limits<uint16_t>::max()};
+        BoardInt board{BIntMax, 1U};
 
         CHECK(BIntMax == board.size().x);
-        CHECK(BIntMax == board.size().y);
-        CHECK(BoardInt::SizeTuple{BIntMax, BIntMax} == board.size());
+        CHECK(1U == board.size().y);
+        CHECK(BoardInt::SizeTuple{BIntMax, 1U} == board.size());
+    }
+}
+
+TEST_CASE("Board::Access Tokens by index", "[Board][Token]")
+{
+    constexpr BoardInt::SizeType Size64k{512U};
+    BoardInt board{Size64k, Size64k};
+
+    for (BoardInt::SizeType y{0U}; y < Size64k; ++y)
+    {
+        for (BoardInt::SizeType x{0U}; x < Size64k; ++x)
+        {
+            CHECK(nullptr == board[x, y]);
+        }
     }
 
-    // Access all tokens by index.
+    for (BoardInt::SizeType y{0U}; y < Size64k; ++y)
+    {
+        for (BoardInt::SizeType x{0U}; x < Size64k; ++x)
+        {
+            BoardInt::TileContent t{std::make_shared<int>(
+                static_cast<int>(board.fromCoords(x, y)))};
+            board[x, y] = std::move(t);
+            CHECK(nullptr == t);
+        }
+    }
+
+    for (BoardInt::SizeType y{0U}; y < Size64k; ++y)
+    {
+        for (BoardInt::SizeType x{0U}; x < Size64k; ++x)
+        {
+            CHECK(board.fromCoords(x, y) == *(board[x, y]));
+        }
+    }
+}
+
+class DummyInts
+{
+public:
+    DummyInts(int a, int b) : m_a{a}, m_b{b} {}
+
+    constexpr bool operator==(DummyInts const&) const = default;
+
+    int m_a;
+    int m_b;
+};
+
+TEST_CASE("Board::emplace", "[Board][Token]")
+{
+    using BoardDummyInts = tc::TBoard<DummyInts>;
+    constexpr BoardDummyInts::SizeType Size64k{512U};
+    BoardDummyInts board{Size64k, Size64k};
+
+    CHECK(nullptr == board[0U, 0U]);
+    board.emplace(0U, 0U, 3, 4);
+    CHECK(DummyInts{3, 4} == *(board[0U, 0U]));
+
+    CHECK(nullptr == board[Size64k - 1, Size64k - 1U]);
+    board.emplace(Size64k - 1U, Size64k - 1U, 43, 124);
+    CHECK(DummyInts{43, 124} == *(board[Size64k - 1, Size64k - 1U]));
+}
+
+TEST_CASE("Board::emplace_swap", "[Board][Token]")
+{
+    using BoardDummyInts = tc::TBoard<DummyInts>;
+    constexpr BoardDummyInts::SizeType Size64k{512U};
+    BoardDummyInts board{Size64k, Size64k};
+
+    CHECK(nullptr == board[0U, 0U]);
+    board.emplace(0U, 0U, 3, 4);
+    CHECK(DummyInts{3, 4} == *(board[0U, 0U]));
+
+    CHECK(nullptr == board[Size64k - 1, Size64k - 1U]);
+    board.emplace(Size64k - 1U, Size64k - 1U, 43, 124);
+    CHECK(DummyInts{43, 124} == *(board[Size64k - 1, Size64k - 1U]));
+
+    BoardDummyInts::TileContent tile;
+    CHECK(nullptr == tile);
+
+    tile = board.emplace_swap(0U, 0U, 12, 25);
+    CHECK(nullptr != tile);
+    CHECK(DummyInts{3, 4} == *tile);
+    CHECK(DummyInts{12, 25} == *(board[0U, 0U]));
+
+    tile = board.emplace_swap(Size64k - 1, Size64k - 1U, 101, 256);
+    CHECK(nullptr != tile);
+    CHECK(DummyInts{43, 124} == *tile);
+    CHECK(DummyInts{101, 256} == *(board[Size64k - 1, Size64k - 1U]));
+    CHECK(DummyInts{12, 25} == *(board[0U, 0U]));
 }

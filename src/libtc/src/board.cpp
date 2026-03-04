@@ -4,10 +4,12 @@ import token;
 import <vector>;
 import <memory>;
 import <cstddef>;
+import <concepts>;
 
 namespace tc
 {
 export template <typename T>
+    requires std::movable<T>
 class TBoard : public std::enable_shared_from_this<T>
 {
 public:
@@ -39,9 +41,29 @@ public:
         return m_tokens[fromCoords(x, y)];
     }
 
-    TileContent operator[](SizeType const x, SizeType const y) noexcept
+    decltype(auto) operator[](SizeType const x, SizeType const y) noexcept
     {
         return m_tokens[fromCoords(x, y)];
+    }
+
+    ConstTileContent operator[](SizeTuple const& size) const noexcept
+    {
+        return (*this)[size.x, size.y];
+    }
+
+    TileContent operator[](SizeTuple const& size) noexcept
+    {
+        return (*this)[size.x, size.y];
+    }
+
+    TileContent extract(SizeType const x, SizeType const y) noexcept
+    {
+        return std::move(this[x, y]);
+    }
+
+    TileContent extract(SizeTuple size) noexcept
+    {
+        return std::move(this[size.x, size.y]);
     }
 
     SizeType sizex() const noexcept { return m_size.x; }
@@ -49,6 +71,44 @@ public:
     SizeType sizey() const noexcept { return m_size.y; }
 
     SizeTuple size() const noexcept { return {sizex(), sizey()}; }
+
+    TileContent swap_element(SizeType const x, SizeType const y, T element)
+    {
+        TileContent content{std::make_shared<T>(std::move(element))};
+        std::swap(content, (*this)[x, y]);
+        return content;
+    }
+
+    TileContent swap_element(SizeTuple const& size, T element)
+    {
+        return swap_element(size.x, size.y, std::move(element));
+    }
+
+    template <typename... Args>
+    void emplace(SizeType const x, SizeType const y, Args&&... args)
+    {
+        (*this)[x, y] = std::make_shared<T>(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void emplace(SizeTuple const& size, Args&&... args)
+    {
+        emplace(size.x, size.y, std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    TileContent emplace_swap(SizeType const x, SizeType const y, Args&&... args)
+    {
+        TileContent content{std::make_shared<T>(std::forward<Args>(args)...)};
+        std::swap(content, (*this)[x, y]);
+        return content;
+    }
+
+    template <typename... Args>
+    TileContent emplace_swap(SizeTuple const& size, Args&&... args)
+    {
+        return emplace_swap(size.x, size.y, std::forward<Args>(args)...);
+    }
 
 private:
     SizeTuple m_size;
