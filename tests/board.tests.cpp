@@ -88,7 +88,7 @@ TEST_CASE("Board::emplace", "[Board][Token]")
     CHECK(DummyInts{3, 4} == *(board[0U, 0U]));
 
     CHECK(nullptr == board[Size64k - 1, Size64k - 1U]);
-    board.emplace(Size64k - 1U, Size64k - 1U, 43, 124);
+    board.emplace({Size64k - 1U, Size64k - 1U}, 43, 124);
     CHECK(DummyInts{43, 124} == *(board[Size64k - 1, Size64k - 1U]));
 }
 
@@ -114,7 +114,52 @@ TEST_CASE("Board::emplace_swap", "[Board][Token]")
     CHECK(DummyInts{3, 4} == *tile);
     CHECK(DummyInts{12, 25} == *(board[0U, 0U]));
 
-    tile = board.emplace_swap(Size64k - 1, Size64k - 1U, 101, 256);
+    tile = board.emplace_swap({Size64k - 1, Size64k - 1U}, 101, 256);
+    CHECK(nullptr != tile);
+    CHECK(DummyInts{43, 124} == *tile);
+    CHECK(DummyInts{101, 256} == *(board[Size64k - 1, Size64k - 1U]));
+    CHECK(DummyInts{12, 25} == *(board[0U, 0U]));
+}
+
+TEST_CASE("Board::set", "[Board][Token]")
+{
+    using BoardDummyInts = tc::TBoard<DummyInts>;
+    constexpr BoardDummyInts::SizeType Size64k{512U};
+    BoardDummyInts board{Size64k, Size64k};
+
+    CHECK(nullptr == board[0U, 0U]);
+    board.set(0U, 0U, DummyInts{3, 4});
+    CHECK(DummyInts{3, 4} == *(board[0U, 0U]));
+
+    CHECK(nullptr == board[Size64k - 1, Size64k - 1U]);
+    board.set({Size64k - 1U, Size64k - 1U}, DummyInts{43, 124});
+    CHECK(DummyInts{43, 124} == *(board[Size64k - 1, Size64k - 1U]));
+}
+
+TEST_CASE("Board::set_swap", "[Board][Token]")
+{
+    using BoardDummyInts = tc::TBoard<DummyInts>;
+    constexpr BoardDummyInts::SizeType Size64k{512U};
+    BoardDummyInts board{Size64k, Size64k};
+
+    CHECK(nullptr == board[0U, 0U]);
+    board.set(0U, 0U, DummyInts{3, 4});
+    CHECK(DummyInts{3, 4} == *(board[0U, 0U]));
+
+    CHECK(nullptr == board[Size64k - 1, Size64k - 1U]);
+    board.set(Size64k - 1U, Size64k - 1U, DummyInts{43, 124});
+    CHECK(DummyInts{43, 124} == *(board[Size64k - 1, Size64k - 1U]));
+
+    BoardDummyInts::TileContent tile;
+    CHECK(nullptr == tile);
+
+    tile = board.set_swap(0U, 0U, DummyInts{12, 25});
+    CHECK(nullptr != tile);
+    CHECK(DummyInts{3, 4} == *tile);
+    CHECK(DummyInts{12, 25} == *(board[0U, 0U]));
+
+    tile = board.set_swap(BoardDummyInts::SizeTuple{Size64k - 1, Size64k - 1U},
+                          DummyInts{101, 256});
     CHECK(nullptr != tile);
     CHECK(DummyInts{43, 124} == *tile);
     CHECK(DummyInts{101, 256} == *(board[Size64k - 1, Size64k - 1U]));

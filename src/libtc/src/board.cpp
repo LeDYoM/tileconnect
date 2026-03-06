@@ -72,16 +72,47 @@ public:
 
     SizeTuple size() const noexcept { return {sizex(), sizey()}; }
 
-    TileContent swap_element(SizeType const x, SizeType const y, T element)
+    void set(SizeType const x, SizeType const y, T element)
     {
-        TileContent content{std::make_shared<T>(std::move(element))};
+        (*this)[x, y] = std::make_shared<T>(std::move(element));
+    }
+
+    void set(SizeTuple const& size////, T element)
+    {
+        (*this)[x, y] = std::make_shared<T>(std::move(element));
+    }
+
+    TileContent push(SizeTuple const& size, TileContent content)
+    {
+        return push(size.x, size.y, std::move(content));
+    }
+
+    TileContent push_swap(SizeTuple const& size, TileContent content)
+    {
+        return push_swap(size.x, size.y, std::move(content));
+    }
+
+    TileContent push_swap(SizeType const x,
+                          SizeType const y,
+                          TileContent content)
+    {
         std::swap(content, (*this)[x, y]);
         return content;
     }
 
-    TileContent swap_element(SizeTuple const& size, T element)
+    TileContent push_swap(SizeTuple const& size, TileContent content)
     {
-        return swap_element(size.x, size.y, std::move(element));
+        return push_swap(size.x, size.y, std::move(content));
+    }
+
+    TileContent set_swap(SizeType const x, SizeType const y, T element)
+    {
+        return push_swap(x, y, std::make_shared<T>(std::move(element)));
+    }
+
+    TileContent set_swap(SizeTuple const& size, T element)
+    {
+        return set_swap(size.x, size.y, std::move(element));
     }
 
     template <typename... Args>

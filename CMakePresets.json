@@ -11,7 +11,8 @@
             "displayName": "default",
             "description": "default",
             "hidden": true,
-            "binaryDir": "${sourceDir}/preset_build/${presetName}"
+            "binaryDir": "${sourceDir}/preset_build/${presetName}",
+            "installDir": "${sourceDir}/preset_build/intall/${presetName}"
         },
         {
             "name": "win_vs_2022_x64",
