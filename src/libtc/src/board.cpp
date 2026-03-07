@@ -1,16 +1,15 @@
 export module board;
 
 import token;
-import <vector>;
-import <memory>;
-import <cstddef>;
-import <concepts>;
+import<vector>;
+import<memory>;
+import<cstddef>;
+import<concepts>;
 
 namespace tc
 {
 export template <typename T>
-    requires std::movable<T>
-class TBoard : public std::enable_shared_from_this<T>
+requires std::movable<T> class TBoard : public std::enable_shared_from_this<T>
 {
 public:
     using TileContent      = typename std::shared_ptr<T>;
@@ -35,35 +34,24 @@ public:
         return (m_size.x * y) + x;
     }
 
-    ConstTileContent operator[](SizeType const x,
-                                SizeType const y) const noexcept
+    ConstTileContent get(SizeType const x, SizeType const y) const noexcept
     {
-        return m_tokens[fromCoords(x, y)];
+        return (*this)[x, y];
     }
 
-    decltype(auto) operator[](SizeType const x, SizeType const y) noexcept
+    ConstTileContent get(SizeTuple const& size) const noexcept
     {
-        return m_tokens[fromCoords(x, y)];
-    }
-
-    ConstTileContent operator[](SizeTuple const& size) const noexcept
-    {
-        return (*this)[size.x, size.y];
-    }
-
-    TileContent operator[](SizeTuple const& size) noexcept
-    {
-        return (*this)[size.x, size.y];
+        return (*this)[size];
     }
 
     TileContent extract(SizeType const x, SizeType const y) noexcept
     {
-        return std::move(this[x, y]);
+        return std::move((*this)[x, y]);
     }
 
     TileContent extract(SizeTuple size) noexcept
     {
-        return std::move(this[size.x, size.y]);
+        return std::move((*this)[size.x, size.y]);
     }
 
     SizeType sizex() const noexcept { return m_size.x; }
@@ -72,19 +60,24 @@ public:
 
     SizeTuple size() const noexcept { return {sizex(), sizey()}; }
 
+    void push(SizeTuple const& size, TileContent content)
+    {
+        push(size.x, size.y, std::move(content));
+    }
+
+    void push(SizeType const x, SizeType const y, TileContent element)
+    {
+        (*this)[x, y] = std::move(element);
+    }
+
     void set(SizeType const x, SizeType const y, T element)
     {
-        (*this)[x, y] = std::make_shared<T>(std::move(element));
+        push(x, y, std::make_shared<T>(std::move(element)));
     }
 
-    void set(SizeTuple const& size////, T element)
+    void set(SizeTuple const& size, T element)
     {
-        (*this)[x, y] = std::make_shared<T>(std::move(element));
-    }
-
-    TileContent push(SizeTuple const& size, TileContent content)
-    {
-        return push(size.x, size.y, std::move(content));
+        set(size.x, size.y, std::move(element));
     }
 
     TileContent push_swap(SizeTuple const& size, TileContent content)
@@ -98,11 +91,6 @@ public:
     {
         std::swap(content, (*this)[x, y]);
         return content;
-    }
-
-    TileContent push_swap(SizeTuple const& size, TileContent content)
-    {
-        return push_swap(size.x, size.y, std::move(content));
     }
 
     TileContent set_swap(SizeType const x, SizeType const y, T element)
@@ -141,7 +129,44 @@ public:
         return emplace_swap(size.x, size.y, std::forward<Args>(args)...);
     }
 
+    void swap_tiles(SizeTuple const& lpos, SizeTuple const& rpos)
+    {
+        if (lpos != rpos)
+        {
+            std::swap((*this)[lpos.x, lpos.y], (*this)[rpos.x, rpos.y]);
+        }
+    }
+
+    void swap_tiles(SizeType const lx,
+                    SizeType const ly,
+                    SizeType const rx,
+                    SizeType const ry)
+    {
+        swap_tiles(SizeTuple{lx, ly}, SizeTuple{rx, ry});
+    }
+
 private:
+    ConstTileContent operator[](SizeType const x,
+                                SizeType const y) const noexcept
+    {
+        return m_tokens[fromCoords(x, y)];
+    }
+
+    ConstTileContent operator[](SizeTuple const& size) const noexcept
+    {
+        return (*this)[size.x, size.y];
+    }
+
+    decltype(auto) operator[](SizeType const x, SizeType const y) noexcept
+    {
+        return m_tokens[fromCoords(x, y)];
+    }
+
+    decltype(auto) operator[](SizeTuple const& size) noexcept
+    {
+        return (*this)[size.x, size.y];
+    }
+
     SizeTuple m_size;
     BoardContent m_tokens;
 };
