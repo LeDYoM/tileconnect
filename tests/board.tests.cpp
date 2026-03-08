@@ -61,7 +61,8 @@ TEST_CASE("Board::Access Tokens by index", "[Board][Token]")
     {
         for (BoardInt::SizeType x{0U}; x < Size64k; ++x)
         {
-            CHECK(board.fromCoords(x, y) == *(board.get(x, y)));
+            CHECK(static_cast<int>(board.fromCoords(x, y)) ==
+                  *(board.get(x, y)));
         }
     }
 }

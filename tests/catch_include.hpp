@@ -4,4 +4,8 @@
 #pragma warning(disable : 4514 4620 4623 4625 4626 4820 5026 5027 5204)
 #include <catch2/catch_test_macros.hpp>
 #pragma warning(pop)
+
+// 4868: Catch 2 test macros warning
+// 5045: Spectre warning
+#pragma warning(disable : 4868 5045)
 #endif

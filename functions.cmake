@@ -50,7 +50,7 @@ endfunction()
 function(set_project_options CURRENT_TARGET)
 set_cxx_standard(${CURRENT_TARGET})
     target_compile_options(${CURRENT_TARGET} PRIVATE
-        $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+        $<$<CXX_COMPILER_ID:MSVC>:/Wall>
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic -Wno-unknown-pragmas>
     )
     set_property(TARGET ${CURRENT_TARGET} PROPERTY COMPILE_WARNING_AS_ERROR ON)
