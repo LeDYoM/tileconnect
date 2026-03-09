@@ -2,6 +2,6 @@
 
 import tile_connect;
 
-TEST_CASE("Token", "[Token]")
+TEST_CASE("Token", "[Token][Board]")
 {
 }
