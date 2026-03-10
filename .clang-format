@@ -119,6 +119,8 @@ SpacesInContainerLiterals: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
+RequiresClausePosition: OwnLine
+IndentRequiresClause: true
 Standard:        Latest
 TabWidth:        4
 UseTab:          Never

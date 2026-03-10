@@ -16,7 +16,7 @@ TEST_CASE("Board::construct", "[Board]")
     }
 
     {
-        BoardInt board{0U, 0U};
+        BoardInt board{BoardInt::SizeTuple{0U, 0U}};
 
         CHECK(0U == board.size().x);
         CHECK(0U == board.size().y);
@@ -82,7 +82,7 @@ TEST_CASE("Board::emplace", "[Board][Token]")
 {
     using BoardDummyInts = tc::TBoard<DummyInts>;
     constexpr BoardDummyInts::SizeType Size64k{512U};
-    BoardDummyInts board{Size64k, Size64k};
+    BoardDummyInts board{BoardDummyInts::SizeTuple(Size64k, Size64k)};
 
     CHECK(nullptr == board.get(0U, 0U));
     board.emplace(0U, 0U, 3, 4);
@@ -259,4 +259,12 @@ TEST_CASE("Board::extract", "[Board][Token]")
     CHECK(nullptr == ZeroZero);
     Other = board.extract(255U, 255U);
     CHECK(nullptr == Other);
+}
+
+TEST_CASE("Board::shared_from_this", "[Board][Token]")
+{
+    auto board{BoardInt::createTBoard(6U, 7U)};
+    CHECK(nullptr != board);
+    auto board2{board->shared_from_this()};
+    CHECK(board.get() == board2.get());
 }
