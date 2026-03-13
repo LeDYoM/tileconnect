@@ -1,6 +1,5 @@
 export module board;
 
-import token;
 import <vector>;
 import <memory>;
 import <cstddef>;
@@ -9,7 +8,6 @@ import <concepts>;
 namespace tc
 {
 export template <typename T>
-    requires std::movable<T>
 class TBoard : public std::enable_shared_from_this<TBoard<T>>
 {
 public:

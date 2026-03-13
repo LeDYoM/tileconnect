@@ -18,5 +18,6 @@ target_sources(${ctl} PRIVATE
     src/board.cpp
     src/common.cpp
     src/tc_module.cppm
+    src/token_board.cpp
     src/token.cpp
 )

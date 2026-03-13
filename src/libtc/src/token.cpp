@@ -1,18 +1,24 @@
 export module token;
 
 import <memory>;
+import board;
 
 namespace tc
 {
-class Board;
 export class Token
 {
 public:
-    explicit Token(std::shared_ptr<Board> parent_board) :
+    using BoardSPtr = std::shared_ptr<TBoard<Token>>;
+    using ConstBoardSPtr = std::shared_ptr<TBoard<Token> const>;
+
+    explicit Token(BoardSPtr parent_board) :
         m_parent_board{std::move(parent_board)}
     {}
 
+    BoardSPtr board() noexcept { return m_parent_board; }
+    ConstBoardSPtr board() const noexcept { return m_parent_board; }
+
 private:
-    std::shared_ptr<Board> m_parent_board;
+    BoardSPtr m_parent_board;
 };
 }  // namespace tc
