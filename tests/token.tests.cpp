@@ -9,7 +9,7 @@ TEST_CASE("Token::Token", "[Token][Board]")
     std::shared_ptr<BoardOfTokens> board{
         BoardOfTokens::createTBoard(128U, 128U)};
 
-    tc::Token token{board};
+    tc::Token token{board, BoardOfTokens::SizeTuple{0U, 0U}, 0U};
     (void)(token);
 }
 
@@ -18,7 +18,7 @@ TEST_CASE("Token::board", "[Token][Board]")
     std::shared_ptr<BoardOfTokens> board{
         BoardOfTokens::createTBoard(128U, 128U)};
 
-    tc::Token token{board};
+    tc::Token token{board, 0U, 0U, 0U};
     CHECK(token.board().get() == board.get());
 
     tc::Token const cToken{std::as_const(token)};

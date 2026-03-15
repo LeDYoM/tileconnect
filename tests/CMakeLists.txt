@@ -9,6 +9,7 @@ set_project_options(${ct})
 target_sources(${ct} PRIVATE
     board.tests.cpp
     catch_include.hpp
+    token_board.tests.cpp
     token.tests.cpp)
 
 target_link_libraries(${ct} PRIVATE Catch2::Catch2WithMain tc)
