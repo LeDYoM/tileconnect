@@ -23,5 +23,8 @@ TEST_CASE("Token::board", "[Token][Board]")
 
     tc::Token const cToken{std::as_const(token)};
     auto cBoard{cToken.board()};
-    static_assert(std::is_const_v<decltype(cBoard)::element_type>);
+    STATIC_CHECK(std::is_const_v<decltype(cBoard)::element_type>);
+
+    auto cBoard2{token.cboard()};
+    STATIC_CHECK(std::is_const_v<decltype(cBoard2)::element_type>);
 }

@@ -51,7 +51,7 @@ TEST_CASE("Board::Access Tokens by index", "[Board][Token]")
         for (BoardInt::SizeType x{0U}; x < Size64k; ++x)
         {
             BoardInt::TileContent t{std::make_shared<int>(
-                static_cast<int>(board.fromCoords(x, y)))};
+                static_cast<int>(board.from_coords(x, y)))};
             board.push(x, y, std::move(t));
             CHECK(nullptr == t);
         }
@@ -61,7 +61,7 @@ TEST_CASE("Board::Access Tokens by index", "[Board][Token]")
     {
         for (BoardInt::SizeType x{0U}; x < Size64k; ++x)
         {
-            CHECK(static_cast<int>(board.fromCoords(x, y)) ==
+            CHECK(static_cast<int>(board.from_coords(x, y)) ==
                   *(board.get(x, y)));
         }
     }
@@ -135,6 +135,20 @@ TEST_CASE("Board::set", "[Board][Token]")
     CHECK(nullptr == board.get(Size64k - 1, Size64k - 1U));
     board.set({Size64k - 1U, Size64k - 1U}, DummyInts{43, 124});
     CHECK(DummyInts{43, 124} == *(board.get(Size64k - 1, Size64k - 1U)));
+
+    auto token0{board.get(Size64k - 1, Size64k - 1U)};
+    auto token1{std::as_const(board).get(Size64k - 1, Size64k - 1U)};
+    auto token2{board.cget(Size64k - 1, Size64k - 1U)};
+
+    CHECK(DummyInts{43, 124} == *token0);
+    CHECK(DummyInts{43, 124} == *token1);
+    CHECK(DummyInts{43, 124} == *token2);
+    CHECK(token0.get() == token1.get());
+    CHECK(token1.get() == token2.get());
+
+    STATIC_CHECK(!std::is_const_v<decltype(token0)::element_type>);
+    STATIC_CHECK(std::is_const_v<decltype(token1)::element_type>);
+    STATIC_CHECK(std::is_const_v<decltype(token2)::element_type>);
 }
 
 TEST_CASE("Board::set_swap", "[Board][Token]")
@@ -267,4 +281,19 @@ TEST_CASE("Board::shared_from_this", "[Board][Token]")
     CHECK(nullptr != board);
     auto board2{board->shared_from_this()};
     CHECK(board.get() == board2.get());
+}
+
+TEST_CASE("Board::sizes", "[Board][Token]")
+{
+    constexpr BoardInt::SizeTuple BoardSize{128U, 256U};
+    auto board{BoardInt::createTBoard(BoardSize)};
+
+    CHECK(BoardSize == board->size());
+    CHECK(BoardSize.x == board->sizex());
+    CHECK(BoardSize.y == board->sizey());
+
+    CHECK(129U == board->from_coords(1U, 1U));
+    CHECK(258U == board->from_coords(2U, 2U));
+
+    CHECK((BoardSize.x * BoardSize.y) == board->cells());
 }

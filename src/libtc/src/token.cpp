@@ -28,8 +28,11 @@ public:
         Token(std::move(parent_board), SizeTuple{x, y}, std::move(value))
     {}
 
+    TokenValue get() const noexcept { return m_value; }
+
     BoardSPtr board() noexcept { return m_parent_board; }
     ConstBoardSPtr board() const noexcept { return m_parent_board; }
+    ConstBoardSPtr cboard() const noexcept { return m_parent_board; }
 
 private:
     BoardSPtr m_parent_board;

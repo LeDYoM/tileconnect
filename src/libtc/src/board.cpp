@@ -29,10 +29,16 @@ public:
 
     explicit TBoard(SizeTuple const size) : TBoard{size.x, size.y} {}
 
-    [[nodiscard]] constexpr SizeType fromCoords(SizeType const x,
+    [[nodiscard]] constexpr SizeType from_coords(SizeType const x,
                                                 SizeType const y) const noexcept
     {
         return (m_size.x * y) + x;
+    }
+
+    [[nodiscard]] constexpr SizeType from_coords(
+        SizeTuple const& size) const noexcept
+    {
+        return from_coords(size.x, size.y);
     }
 
     [[nodiscard]] ConstTileContent get(SizeType const x,
@@ -44,6 +50,27 @@ public:
     [[nodiscard]] ConstTileContent get(SizeTuple const& size) const noexcept
     {
         return (*this)[size];
+    }
+
+    [[nodiscard]] TileContent get(SizeType const x, SizeType const y) noexcept
+    {
+        return (*this)[x, y];
+    }
+
+    [[nodiscard]] TileContent get(SizeTuple const& size) noexcept
+    {
+        return (*this)[size];
+    }
+
+    [[nodiscard]] ConstTileContent cget(SizeType const x,
+                                        SizeType const y) const noexcept
+    {
+        return get(x, y);
+    }
+
+    [[nodiscard]] ConstTileContent cget(SizeTuple const& size) const noexcept
+    {
+        return get(size);
     }
 
     [[nodiscard]] TileContent extract(SizeType const x,
@@ -62,6 +89,11 @@ public:
     [[nodiscard]] SizeType sizey() const noexcept { return m_size.y; }
 
     [[nodiscard]] SizeTuple size() const noexcept { return {sizex(), sizey()}; }
+
+    [[nodiscard]] SizeType cells() const noexcept
+    {
+        return sizex() * sizey();
+    }
 
     void push(SizeTuple const& size, TileContent content)
     {
@@ -169,7 +201,7 @@ private:
     [[nodiscard]] ConstTileContent operator[](SizeType const x,
                                               SizeType const y) const noexcept
     {
-        return m_tokens[fromCoords(x, y)];
+        return m_tokens[from_coords(x, y)];
     }
 
     [[nodiscard]] ConstTileContent operator[](
@@ -181,7 +213,7 @@ private:
     [[nodiscard]] decltype(auto) operator[](SizeType const x,
                                             SizeType const y) noexcept
     {
-        return m_tokens[fromCoords(x, y)];
+        return m_tokens[from_coords(x, y)];
     }
 
     [[nodiscard]] decltype(auto) operator[](SizeTuple const& size) noexcept

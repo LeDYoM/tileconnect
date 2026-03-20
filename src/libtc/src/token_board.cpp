@@ -14,27 +14,58 @@ public:
     using TileContent           = TBoard<Token>::TileContent;
     using ConstTileContent      = TBoard<Token>::ConstTileContent;
     using SizeTuple             = InnerBoard_t::SizeTuple;
+    using SizeType              = InnerBoard_t::SizeType;
 
     explicit TokenBoard(SizeTuple const& size) :
         m_board{InnerBoard_t::createTBoard(size)}
     {}
 
+    TokenBoard(SizeType const x, SizeType const y) : TokenBoard{SizeTuple{x, y}}
+    {}
+
     /**
-     * @brief Create a Token object
+     * @brief Add a Token object to the board
      * If the position already contains a token, no token will be added
      * @param position The position where to add the token
      * @return TileContent Containing a copy of the added Token or nullptr if a
      * Token was already in the position
      */
-    TileContent createToken(SizeTuple const& position, Token::TokenValue /*value*/)
+    TileContent addToken(SizeTuple const& position, Token::TokenValue value)
     {
         if (m_board->get(position) == nullptr)
         {
-//            std::shared_ptr<tc::Token> t{std::make_shared<tc::Token>(m_board, SizeTuple{0U, 0U}, 0U)};
-//            InnerBoardSharedPtr_t t2{std::make_shared<InnerBoard_t>(m_board, position, 0)};
-            m_board->emplace(position, m_board, SizeTuple{0U, 0U}, 0U);
+            m_board->emplace(position, m_board, SizeTuple{0U, 0U},
+                             std::move(value));
+            return m_board->get(position);
         }
         return nullptr;
+    }
+
+    bool swapTokens(SizeTuple const& lhPosition,
+                    SizeTuple const& rhPosition) noexcept
+    {
+        if (m_board->get(lhPosition) != nullptr &&
+            m_board->get(rhPosition) != nullptr)
+        {
+            m_board->swap_tiles(lhPosition, rhPosition);
+            return true;
+        }
+        return false;
+    }
+
+    TileContent get(SizeTuple const& position) noexcept
+    {
+        return m_board->get(position);
+    }
+
+    ConstTileContent get(SizeTuple const& position) const noexcept
+    {
+        return m_board->get(position);
+    }
+
+    ConstTileContent cget(SizeTuple const& position) const noexcept
+    {
+        return m_board->cget(position);
     }
 
 private:
