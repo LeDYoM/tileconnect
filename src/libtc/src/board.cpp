@@ -7,7 +7,18 @@ import <concepts>;
 
 namespace tc
 {
-export template <typename T>
+struct OutOfBoundsPolicy
+{
+    [[nodiscard]] static constexpr bool check(auto const x,
+                                              auto const y,
+                                              auto const maxx,
+                                              auto const maxy)
+    {
+        return x < maxx && y < maxy;
+    }
+};
+
+export template <typename T, typename OOBPolocy = OutOfBoundsPolicy>
 class TBoard : public std::enable_shared_from_this<TBoard<T>>
 {
 public:
@@ -29,8 +40,25 @@ public:
 
     explicit TBoard(SizeTuple const size) : TBoard{size.x, size.y} {}
 
-    [[nodiscard]] constexpr SizeType from_coords(SizeType const x,
-                                                SizeType const y) const noexcept
+    TBoard(TBoard const&)            = default;
+    TBoard& operator=(TBoard const&) = default;
+
+    TBoard(TBoard&& rhs) noexcept :
+        m_size{rhs.m_size}, m_tokens{std::move(rhs.m_tokens)}
+    {
+        rhs.m_size = {0U, 0U};
+    }
+
+    TBoard& operator=(TBoard&& rhs)
+    {
+        std::swap(m_size, rhs.m_size);
+        std::swap(m_tokens, rhs.m_tokens);
+        return *this;
+    }
+
+    [[nodiscard]] constexpr SizeType from_coords(
+        SizeType const x,
+        SizeType const y) const noexcept
     {
         return (m_size.x * y) + x;
     }
@@ -44,33 +72,12 @@ public:
     [[nodiscard]] ConstTileContent get(SizeType const x,
                                        SizeType const y) const noexcept
     {
-        return (*this)[x, y];
+        return valid_coords(x, y) ? (*this)[x, y] : nullptr;
     }
 
     [[nodiscard]] ConstTileContent get(SizeTuple const& size) const noexcept
     {
-        return (*this)[size];
-    }
-
-    [[nodiscard]] TileContent get(SizeType const x, SizeType const y) noexcept
-    {
-        return (*this)[x, y];
-    }
-
-    [[nodiscard]] TileContent get(SizeTuple const& size) noexcept
-    {
-        return (*this)[size];
-    }
-
-    [[nodiscard]] ConstTileContent cget(SizeType const x,
-                                        SizeType const y) const noexcept
-    {
-        return get(x, y);
-    }
-
-    [[nodiscard]] ConstTileContent cget(SizeTuple const& size) const noexcept
-    {
-        return get(size);
+        return valid_coords(size.x, size.y) ? (*this)[size] : nullptr;
     }
 
     [[nodiscard]] TileContent extract(SizeType const x,
@@ -90,10 +97,7 @@ public:
 
     [[nodiscard]] SizeTuple size() const noexcept { return {sizex(), sizey()}; }
 
-    [[nodiscard]] SizeType cells() const noexcept
-    {
-        return sizex() * sizey();
-    }
+    [[nodiscard]] SizeType cells() const noexcept { return sizex() * sizey(); }
 
     void push(SizeTuple const& size, TileContent content)
     {
@@ -102,7 +106,10 @@ public:
 
     void push(SizeType const x, SizeType const y, TileContent element)
     {
-        (*this)[x, y] = std::move(element);
+        if (OOBPolocy::check(x, y, m_size.x, m_size.y))
+        {
+            (*this)[x, y] = std::move(element);
+        }
     }
 
     void set(SizeType const x, SizeType const y, T element)
@@ -125,7 +132,10 @@ public:
                                         SizeType const y,
                                         TileContent content)
     {
-        std::swap(content, (*this)[x, y]);
+        if (OOBPolocy::check(x, y, m_size.x, m_size.y))
+        {
+            std::swap(content, (*this)[x, y]);
+        }
         return content;
     }
 
@@ -144,7 +154,10 @@ public:
     template <typename... Args>
     void emplace(SizeType const x, SizeType const y, Args&&... args)
     {
-        (*this)[x, y] = std::make_shared<T>(std::forward<Args>(args)...);
+        if (OOBPolocy::check(x, y, m_size.x, m_size.y))
+        {
+            (*this)[x, y] = std::make_shared<T>(std::forward<Args>(args)...);
+        }
     }
 
     template <typename... Args>
@@ -154,9 +167,9 @@ public:
     }
 
     template <typename... Args>
-    [[nodiscard]] TileContent emplace_swap(SizeType const x,
-                                           SizeType const y,
-                                           Args&&... args)
+    [[nodiscard]] ConstTileContent emplace_swap(SizeType const x,
+                                                SizeType const y,
+                                                Args&&... args)
     {
         TileContent content{std::make_shared<T>(std::forward<Args>(args)...)};
         std::swap(content, (*this)[x, y]);
@@ -164,15 +177,17 @@ public:
     }
 
     template <typename... Args>
-    [[nodiscard]] TileContent emplace_swap(SizeTuple const& size,
-                                           Args&&... args)
+    [[nodiscard]] ConstTileContent emplace_swap(SizeTuple const& size,
+                                                Args&&... args)
     {
         return emplace_swap(size.x, size.y, std::forward<Args>(args)...);
     }
 
     void swap_tiles(SizeTuple const& lpos, SizeTuple const& rpos)
     {
-        if (lpos != rpos)
+        if (lpos != rpos &&
+            OOBPolocy::check(lpos.x, lpos.y, m_size.x, m_size.y) &&
+            OOBPolocy::check(rpos.x, rpos.y, m_size.x, m_size.y))
         {
             std::swap((*this)[lpos.x, lpos.y], (*this)[rpos.x, rpos.y]);
         }
@@ -186,13 +201,45 @@ public:
         swap_tiles(SizeTuple{lx, ly}, SizeTuple{rx, ry});
     }
 
-    static std::shared_ptr<TBoard<T>> createTBoard(SizeType const x,
-                                                   SizeType const y)
+    [[nodiscard]] bool valid_coords(SizeType const x, SizeType const y) const
+    {
+        return x < m_size.x && y < m_size.y;
+    }
+
+    [[nodiscard]] bool valid_coords(SizeTuple const& size) const
+    {
+        return valid_coords(size.x, size.y);
+    }
+
+    [[nodiscard]] BoardContent::const_iterator begin() const noexcept
+    {
+        return m_tokens.begin();
+    }
+
+    [[nodiscard]] BoardContent::const_iterator cbegin() const noexcept
+    {
+        return m_tokens.cbegin();
+    }
+
+    [[nodiscard]] BoardContent::const_iterator end() const noexcept
+    {
+        return m_tokens.end();
+    }
+
+    [[nodiscard]] BoardContent::const_iterator cend() const noexcept
+    {
+        return m_tokens.cend();
+    }
+
+    [[nodiscard]] static std::shared_ptr<TBoard<T>> createTBoard(
+        SizeType const x,
+        SizeType const y)
     {
         return std::make_shared<TBoard<T>>(x, y);
     }
 
-    static std::shared_ptr<TBoard<T>> createTBoard(SizeTuple const size)
+    [[nodiscard]] static std::shared_ptr<TBoard<T>> createTBoard(
+        SizeTuple const size)
     {
         return std::make_shared<TBoard<T>>(size);
     }

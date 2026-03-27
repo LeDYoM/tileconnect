@@ -1,3 +1,7 @@
+module;
+
+#include "tc_export.hpp"
+
 export module token_board;
 
 import <memory>;
@@ -23,6 +27,16 @@ public:
     TokenBoard(SizeType const x, SizeType const y) : TokenBoard{SizeTuple{x, y}}
     {}
 
+    TokenBoard(TokenBoard&&)            = default;
+    TokenBoard& operator=(TokenBoard&&) = default;
+
+    TokenBoard clone()
+    {
+        TokenBoard token_board_copy{m_board->size()};
+
+        return token_board_copy;
+    }
+
     /**
      * @brief Add a Token object to the board
      * If the position already contains a token, no token will be added
@@ -30,7 +44,7 @@ public:
      * @return TileContent Containing a copy of the added Token or nullptr if a
      * Token was already in the position
      */
-    TileContent addToken(SizeTuple const& position, Token::TokenValue value)
+    ConstTileContent addToken(SizeTuple const& position, Token::TokenValue value)
     {
         if (m_board->get(position) == nullptr)
         {
@@ -53,22 +67,15 @@ public:
         return false;
     }
 
-    TileContent get(SizeTuple const& position) noexcept
+    [[nodiscard]] ConstTileContent get(SizeTuple const& position) const noexcept
     {
         return m_board->get(position);
-    }
-
-    ConstTileContent get(SizeTuple const& position) const noexcept
-    {
-        return m_board->get(position);
-    }
-
-    ConstTileContent cget(SizeTuple const& position) const noexcept
-    {
-        return m_board->cget(position);
     }
 
 private:
+    TokenBoard(TokenBoard const&)            = default;
+    TokenBoard& operator=(TokenBoard const&) = default;
+
     InnerBoardSharedPtr_t m_board;
 };
 }  // namespace tc

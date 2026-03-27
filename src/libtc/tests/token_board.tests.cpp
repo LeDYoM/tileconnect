@@ -37,19 +37,19 @@ TEST_CASE("TokenBoard::TokenBoard", "[Token][Board]")
         CHECK(nullptr != newToken2);
 
         CHECK(6U == board.get({0U, 0U})->get());
-        CHECK(6U == board.cget({0U, 0U})->get());
+        CHECK(6U == board.get({0U, 0U})->get());
         CHECK(1U == board.get({4U, 4U})->get());
-        CHECK(1U == board.cget({4U, 4U})->get());
+        CHECK(1U == board.get({4U, 4U})->get());
         CHECK(9U == board.get({2U, 2U})->get());
         CHECK(9U == board.get({2U, 2U})->get());
         CHECK(10U == board.get({9U, 9U})->get());
         CHECK(10U == board.get({9U, 9U})->get());
 
         CHECK(nullptr == board.get({1U, 1U}));
-        CHECK(nullptr == board.cget({1U, 1U}));
+        CHECK(nullptr == board.get({1U, 1U}));
         CHECK(nullptr == board.get({60U, 60U}));
-        CHECK(nullptr == board.cget({60U, 60U}));
-//        CHECK(nullptr == board.get({128U, 128U}));
-//        CHECK(nullptr == board.cget({128U, 128U}));
+        CHECK(nullptr == board.get({60U, 60U}));
+        CHECK(nullptr == board.get({128U, 128U}));
+        CHECK(nullptr == board.get({128U, 128U}));
     }
 }

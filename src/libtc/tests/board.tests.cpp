@@ -107,7 +107,7 @@ TEST_CASE("Board::emplace_swap", "[Board][Token]")
     board.emplace(Size64k - 1U, Size64k - 1U, 43, 124);
     CHECK(DummyInts{43, 124} == *(board.get(Size64k - 1, Size64k - 1U)));
 
-    BoardDummyInts::TileContent tile;
+    BoardDummyInts::ConstTileContent tile;
     CHECK(nullptr == tile);
 
     tile = board.emplace_swap(0U, 0U, 12, 25);
@@ -138,7 +138,7 @@ TEST_CASE("Board::set", "[Board][Token]")
 
     auto token0{board.get(Size64k - 1, Size64k - 1U)};
     auto token1{std::as_const(board).get(Size64k - 1, Size64k - 1U)};
-    auto token2{board.cget(Size64k - 1, Size64k - 1U)};
+    auto token2{board.get(Size64k - 1, Size64k - 1U)};
 
     CHECK(DummyInts{43, 124} == *token0);
     CHECK(DummyInts{43, 124} == *token1);
@@ -146,7 +146,7 @@ TEST_CASE("Board::set", "[Board][Token]")
     CHECK(token0.get() == token1.get());
     CHECK(token1.get() == token2.get());
 
-    STATIC_CHECK(!std::is_const_v<decltype(token0)::element_type>);
+    STATIC_CHECK(std::is_const_v<decltype(token0)::element_type>);
     STATIC_CHECK(std::is_const_v<decltype(token1)::element_type>);
     STATIC_CHECK(std::is_const_v<decltype(token2)::element_type>);
 }
@@ -296,4 +296,84 @@ TEST_CASE("Board::sizes", "[Board][Token]")
     CHECK(258U == board->from_coords(2U, 2U));
 
     CHECK((BoardSize.x * BoardSize.y) == board->cells());
+}
+
+TEST_CASE("Board::copy_and_moves", "[Board][Token]")
+{
+    constexpr BoardInt::SizeTuple BoardSize32x32{128U, 128U};
+    BoardInt board32x32{BoardSize32x32};
+    board32x32.emplace(0U, 0U, 56);
+    board32x32.emplace(50U, 124U, 1024);
+    CHECK(56 == *(board32x32.get(0U, 0U)));
+    CHECK(1024 == *(board32x32.get(50U, 124U)));
+
+    BoardInt board32x32_copy{board32x32};
+    CHECK(56 == *(board32x32_copy.get(0U, 0U)));
+    CHECK(1024 == *(board32x32_copy.get(50U, 124U)));
+
+    board32x32.emplace(2U, 3U, 9);
+    CHECK(9 == *(board32x32.get(2U, 3U)));
+    CHECK(nullptr == board32x32_copy.get(2U, 3U));
+
+    board32x32_copy.emplace(5U, 6U, 12);
+    CHECK(12 == *(board32x32_copy.get(5U, 6U)));
+    CHECK(nullptr == board32x32.get(5U, 6U));
+
+    BoardInt board32x32_copy2{BoardSize32x32};
+    CHECK(nullptr == board32x32_copy2.get(0U, 0U));
+    CHECK(nullptr == board32x32_copy2.get(2U, 3U));
+    CHECK(nullptr == board32x32_copy2.get(5U, 6U));
+    CHECK(nullptr == board32x32_copy2.get(50U, 124U));
+
+    board32x32_copy2 = board32x32;
+    CHECK(56 == *(board32x32_copy2.get(0U, 0U)));
+    CHECK(9 == *(board32x32_copy2.get(2U, 3U)));
+    CHECK(nullptr == board32x32_copy2.get(5U, 6U));
+    CHECK(1024 == *(board32x32_copy2.get(50U, 124U)));
+
+    BoardInt board32x32_{board32x32};
+
+    BoardInt board32x32_moved{std::move(board32x32_)};
+    CHECK(56 == *(board32x32_moved.get(0U, 0U)));
+    CHECK(9 == *(board32x32_moved.get(2U, 3U)));
+    CHECK(nullptr == board32x32_moved.get(5U, 6U));
+    CHECK(1024 == *(board32x32_moved.get(50U, 124U)));
+
+    CHECK(nullptr == board32x32_.get(0U, 0U));
+    CHECK(nullptr == board32x32_.get(2U, 3U));
+    CHECK(nullptr == board32x32_.get(5U, 6U));
+    CHECK(nullptr == board32x32_.get(50U, 124U));
+
+    BoardInt board32x32_move_assigned{128U, 128U};
+    board32x32_move_assigned = std::move(board32x32);
+    CHECK(56 == *(board32x32_move_assigned.get(0U, 0U)));
+    CHECK(9 == *(board32x32_move_assigned.get(2U, 3U)));
+    CHECK(nullptr == board32x32_move_assigned.get(5U, 6U));
+    CHECK(1024 == *(board32x32_move_assigned.get(50U, 124U)));
+
+    CHECK(nullptr == board32x32.get(0U, 0U));
+    CHECK(nullptr == board32x32.get(2U, 3U));
+    CHECK(nullptr == board32x32.get(5U, 6U));
+    CHECK(nullptr == board32x32.get(50U, 124U));
+}
+
+TEST_CASE("Board::begin_and_end", "[Board][Token]")
+{
+    constexpr BoardInt::SizeTuple BoardSize32x32{128U, 128U};
+    BoardInt board32x32{BoardSize32x32};
+    board32x32.emplace(0U, 0U, 56);
+    board32x32.emplace(1U, 0U, 243);
+    board32x32.emplace(127U, 127U, 1024);
+
+    auto start(board32x32.begin());
+    CHECK(*start == board32x32.get(0U, 0U));
+    CHECK(56 == **start);
+    auto cstart(board32x32.cbegin());
+    CHECK(start == cstart);
+
+    auto latest(std::prev(board32x32.end()));
+    CHECK(*latest == board32x32.get(127U, 127));
+    CHECK(1024 == **latest);
+    auto clatest(std::prev(board32x32.cend()));
+    CHECK(latest == clatest);
 }
