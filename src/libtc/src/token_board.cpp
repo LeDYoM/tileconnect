@@ -33,6 +33,12 @@ public:
     TokenBoard clone()
     {
         TokenBoard token_board_copy{m_board->size()};
+        for (auto const& element : *m_board)
+        {
+//            std::vector<TileContent>::iterator t{element};
+            const std::shared_ptr<Token const> t2{element};
+//            TBoard<Token>::TileContent token{*element};
+        }
 
         return token_board_copy;
     }
@@ -44,7 +50,8 @@ public:
      * @return TileContent Containing a copy of the added Token or nullptr if a
      * Token was already in the position
      */
-    ConstTileContent addToken(SizeTuple const& position, Token::TokenValue value)
+    ConstTileContent addToken(SizeTuple const& position,
+                              Token::TokenValue value)
     {
         if (m_board->get(position) == nullptr)
         {
