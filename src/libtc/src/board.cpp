@@ -201,7 +201,23 @@ public:
         swap_tiles(SizeTuple{lx, ly}, SizeTuple{rx, ry});
     }
 
-    [[nodiscard]] bool valid_coords(SizeType const x, SizeType const y) const
+    template <typename T2, typename OOBPolocy2>
+    bool swap_board(TBoard<T2, OOBPolocy2>& rhs, SizeTuple const& position)
+    {
+        if (this != std::addressof(rhs) &&
+            OOBPolocy::check(position.x, position.y, m_size.x, m_size.y) &&
+            OOBPolocy2::check(position.x, position.y, rhs.m_size.x,
+                              rhs.m_size.y))
+        {
+            std::swap((*this)[position.x, position.y],
+                      rhs[position.x, position.y]);
+            return true;
+        }
+        return false;
+    }
+
+    [[nodiscard]] bool valid_coords(SizeType const x,
+                                    SizeType const y) const noexcept
     {
         return x < m_size.x && y < m_size.y;
     }

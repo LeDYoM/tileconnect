@@ -34,10 +34,10 @@ public:
     ConstBoardSPtr board() const noexcept { return m_parent_board; }
     ConstBoardSPtr cboard() const noexcept { return m_parent_board; }
 
-    Token(Token const&) = default;
+    Token(Token const&)            = default;
     Token& operator=(Token const&) = default;
 
-    Token(Token&&) = default;
+    Token(Token&&)            = default;
     Token& operator=(Token&&) = default;
 
 private:

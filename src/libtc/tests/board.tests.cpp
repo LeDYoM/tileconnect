@@ -298,6 +298,50 @@ TEST_CASE("Board::sizes", "[Board][Token]")
     CHECK((BoardSize.x * BoardSize.y) == board->cells());
 }
 
+TEST_CASE("Board::swap_board", "[Board][Token]")
+{
+    constexpr BoardInt::SizeTuple BoardSize32x32{128U, 128U};
+
+    BoardInt board32x32{BoardSize32x32};
+    board32x32.emplace(0U, 0U, 56);
+    board32x32.emplace(50U, 124U, 1024);
+    CHECK(56 == *(board32x32.get(0U, 0U)));
+    CHECK(1024 == *(board32x32.get(50U, 124U)));
+
+    constexpr BoardInt::SizeTuple BoardSize32x32_2{126U, 126U};
+
+    BoardInt board32x32_2{BoardSize32x32_2};
+    board32x32_2.emplace(0U, 0U, 56);
+    board32x32_2.emplace(50U, 124U, 2024);
+    board32x32_2.emplace(60U, 124U, 24);
+    CHECK(56 == *(board32x32_2.get(0U, 0U)));
+    CHECK(2024 == *(board32x32_2.get(50U, 124U)));
+    CHECK(24 == *(board32x32_2.get(60U, 124U)));
+
+    CHECK(board32x32.swap_board(board32x32_2, {0U, 0U}));
+    CHECK(56 == *(board32x32.get(0U, 0U)));
+    CHECK(56 == *(board32x32_2.get(0U, 0U)));
+
+    CHECK(board32x32.swap_board(board32x32_2, {50U, 124U}));
+    CHECK(2024 == *(board32x32.get(50U, 124U)));
+    CHECK(1024 == *(board32x32_2.get(50U, 124U)));
+
+    CHECK(board32x32_2.swap_board(board32x32, {60U, 124U}));
+    CHECK(24 == *(board32x32.get(60U, 124U)));
+    CHECK(nullptr == board32x32_2.get(60U, 124U));
+
+    CHECK(board32x32_2.swap_board(board32x32, {80U, 125U}));
+    CHECK(nullptr == board32x32.get(80U, 125U));
+    CHECK(nullptr == board32x32_2.get(80U, 125U));
+
+    CHECK_FALSE(board32x32_2.swap_board(board32x32, {80U, 126U}));
+    CHECK_FALSE(board32x32.swap_board(board32x32_2, {200U, 126U}));
+
+    CHECK_FALSE(board32x32.swap_board(board32x32, {50U, 124U}));
+    CHECK(2024 == *(board32x32.get(50U, 124U)));
+    CHECK(1024 == *(board32x32_2.get(50U, 124U)));
+}
+
 TEST_CASE("Board::copy_and_moves", "[Board][Token]")
 {
     constexpr BoardInt::SizeTuple BoardSize32x32{128U, 128U};

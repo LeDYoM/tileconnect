@@ -30,17 +30,20 @@ public:
     TokenBoard(TokenBoard&&)            = default;
     TokenBoard& operator=(TokenBoard&&) = default;
 
-    TokenBoard clone()
+    [[nodiscard]] TokenBoard clone()
     {
-        TokenBoard token_board_copy{m_board->size()};
-        for (auto const& element : *m_board)
-        {
-//            std::vector<TileContent>::iterator t{element};
-            const std::shared_ptr<Token const> t2{element};
-//            TBoard<Token>::TileContent token{*element};
-        }
+        InnerBoard_t token_board_copy(*m_board);
+        InnerBoardSharedPtr_t shared_ptr_copy{
+            std::make_shared<InnerBoard_t>(std::move(token_board_copy))};
 
-        return token_board_copy;
+//        for (auto const& element : *shared_ptr_copy)
+//        {
+//            const std::shared_ptr<Token const> t2{element};
+//            element->copyChangeBoard(m_board);
+//            token_board_copy->
+//        }
+
+        return TokenBoard{std::move(shared_ptr_copy)};
     }
 
     /**
@@ -55,8 +58,7 @@ public:
     {
         if (m_board->get(position) == nullptr)
         {
-            m_board->emplace(position, m_board, SizeTuple{0U, 0U},
-                             std::move(value));
+            m_board->emplace(position, m_board, position, std::move(value));
             return m_board->get(position);
         }
         return nullptr;
@@ -82,6 +84,10 @@ public:
 private:
     TokenBoard(TokenBoard const&)            = default;
     TokenBoard& operator=(TokenBoard const&) = default;
+
+    explicit TokenBoard(InnerBoardSharedPtr_t&& board) noexcept :
+        m_board{std::move(board)}
+    {}
 
     InnerBoardSharedPtr_t m_board;
 };
