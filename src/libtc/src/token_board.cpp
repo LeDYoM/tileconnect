@@ -30,20 +30,41 @@ public:
     TokenBoard(TokenBoard&&)            = default;
     TokenBoard& operator=(TokenBoard&&) = default;
 
+    TokenBoard& operator=(TokenBoard const&) = default;
+    TokenBoard(TokenBoard const&)            = default;
+
     [[nodiscard]] TokenBoard clone()
     {
-        InnerBoard_t token_board_copy(*m_board);
+        InnerBoard_t inner_token_board_copy(*m_board);
         InnerBoardSharedPtr_t shared_ptr_copy{
-            std::make_shared<InnerBoard_t>(std::move(token_board_copy))};
+            std::make_shared<InnerBoard_t>(std::move(inner_token_board_copy))};
 
-//        for (auto const& element : *shared_ptr_copy)
-//        {
-//            const std::shared_ptr<Token const> t2{element};
-//            element->copyChangeBoard(m_board);
-//            token_board_copy->
-//        }
+        /*
+                for (SizeType y{0U}; y < m_board->sizey(); ++y)
+                {
+                    for (SizeType x{0U}; x < m_board->sizex(); ++x)
+                    {
+                        SizeTuple const position{x,y};
+                        auto const copy_value{m_board->get(position)->value()};
+                        (void)(token_board_copy.addToken(position, copy_value));
+                    }
+                }
+        */
 
-        return TokenBoard{std::move(shared_ptr_copy)};
+        TokenBoard token_board_copy{std::move(shared_ptr_copy)};
+
+        for (auto const& element : *m_board)
+        {
+            if (std::shared_ptr<Token const> const token_copy{element};
+                token_copy != nullptr)
+            {
+                SizeTuple const position{token_copy->position()};
+                token_board_copy.updateToken(position,
+                                             token_copy.get()->value());
+            }
+        }
+
+        return token_board_copy;
     }
 
     /**
@@ -60,6 +81,24 @@ public:
         {
             m_board->emplace(position, m_board, position, std::move(value));
             return m_board->get(position);
+        }
+        return nullptr;
+    }
+
+    /**
+     * @brief Set a Token value in an already occupied board position.
+     * If the position does not contain a token, no token will be added.
+     * @param position The position where the Token to update is
+     * @return TileContent Containing a copy of the updated Token or nullptr if
+     * no Token was in the position.
+     */
+    ConstTileContent updateToken(SizeTuple const position,
+                                 Token::TokenValue value)
+    {
+        if (auto const oldToken{m_board->get(position)}; oldToken != nullptr)
+        {
+            m_board->emplace(position, m_board, position, std::move(value));
+            return oldToken;
         }
         return nullptr;
     }
@@ -82,9 +121,6 @@ public:
     }
 
 private:
-    TokenBoard(TokenBoard const&)            = default;
-    TokenBoard& operator=(TokenBoard const&) = default;
-
     explicit TokenBoard(InnerBoardSharedPtr_t&& board) noexcept :
         m_board{std::move(board)}
     {}

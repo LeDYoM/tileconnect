@@ -28,11 +28,15 @@ public:
         Token(std::move(parent_board), SizeTuple{x, y}, std::move(value))
     {}
 
-    TokenValue get() const noexcept { return m_value; }
+    TokenValue value() const noexcept { return m_value; }
 
     BoardSPtr board() noexcept { return m_parent_board; }
     ConstBoardSPtr board() const noexcept { return m_parent_board; }
     ConstBoardSPtr cboard() const noexcept { return m_parent_board; }
+
+    SizeTuple position() const noexcept { return m_position; }
+    SizeType positionx() const noexcept { return m_position.x; }
+    SizeType positiony() const noexcept { return m_position.y; }
 
     Token(Token const&)            = default;
     Token& operator=(Token const&) = default;
