@@ -13,12 +13,13 @@ namespace tc
 export class TokenBoard
 {
 public:
-    using InnerBoard_t          = TBoard<Token>;
-    using InnerBoardSharedPtr_t = std::shared_ptr<InnerBoard_t>;
-    using TileContent           = TBoard<Token>::TileContent;
-    using ConstTileContent      = TBoard<Token>::ConstTileContent;
-    using SizeTuple             = InnerBoard_t::SizeTuple;
-    using SizeType              = InnerBoard_t::SizeType;
+    using InnerBoard_t               = TBoard<Token>;
+    using InnerBoardSharedPtr_t      = std::shared_ptr<InnerBoard_t>;
+    using ConstInnerBoardSharedPtr_t = std::shared_ptr<InnerBoard_t const>;
+    using TileContent                = TBoard<Token>::TileContent;
+    using ConstTileContent           = TBoard<Token>::ConstTileContent;
+    using SizeTuple                  = InnerBoard_t::SizeTuple;
+    using SizeType                   = InnerBoard_t::SizeType;
 
     explicit TokenBoard(SizeTuple const& size) :
         m_board{InnerBoard_t::createTBoard(size)}
@@ -30,42 +31,19 @@ public:
     TokenBoard(TokenBoard&&)            = default;
     TokenBoard& operator=(TokenBoard&&) = default;
 
-    TokenBoard& operator=(TokenBoard const&) = default;
-    TokenBoard(TokenBoard const&)            = default;
-
-    [[nodiscard]] TokenBoard clone()
+    TokenBoard(TokenBoard const& rhs) : TokenBoard{rhs.m_board}
     {
-        InnerBoard_t inner_token_board_copy(*m_board);
-        InnerBoardSharedPtr_t shared_ptr_copy{
-            std::make_shared<InnerBoard_t>(std::move(inner_token_board_copy))};
-
-        /*
-                for (SizeType y{0U}; y < m_board->sizey(); ++y)
-                {
-                    for (SizeType x{0U}; x < m_board->sizex(); ++x)
-                    {
-                        SizeTuple const position{x,y};
-                        auto const copy_value{m_board->get(position)->value()};
-                        (void)(token_board_copy.addToken(position, copy_value));
-                    }
-                }
-        */
-
-        TokenBoard token_board_copy{std::move(shared_ptr_copy)};
-
-        for (auto const& element : *m_board)
-        {
-            if (std::shared_ptr<Token const> const token_copy{element};
-                token_copy != nullptr)
-            {
-                SizeTuple const position{token_copy->position()};
-                token_board_copy.updateToken(position,
-                                             token_copy.get()->value());
-            }
-        }
-
-        return token_board_copy;
+        updateTokenBoards(rhs.m_board);
     }
+
+    TokenBoard& operator=(TokenBoard const& rhs)
+    {
+        *m_board = *(rhs.m_board);
+        updateTokenBoards(rhs.m_board);
+        return *this;
+    }
+
+    [[nodiscard]] TokenBoard clone() const { return TokenBoard{*this}; }
 
     /**
      * @brief Add a Token object to the board
@@ -120,10 +98,29 @@ public:
         return m_board->get(position);
     }
 
+    ConstInnerBoardSharedPtr_t innerBoard() const noexcept { return m_board; }
+
 private:
     explicit TokenBoard(InnerBoardSharedPtr_t&& board) noexcept :
         m_board{std::move(board)}
     {}
+
+    explicit TokenBoard(InnerBoardSharedPtr_t const& board) noexcept :
+        m_board{std::make_shared<InnerBoard_t>(*board)}
+    {}
+
+    void updateTokenBoards(InnerBoardSharedPtr_t const& board)
+    {
+        for (auto const& element : *board)
+        {
+            if (std::shared_ptr<Token const> const token_copy{element};
+                token_copy != nullptr)
+            {
+                SizeTuple const position{token_copy->position()};
+                updateToken(position, token_copy.get()->value());
+            }
+        }
+    }
 
     InnerBoardSharedPtr_t m_board;
 };
