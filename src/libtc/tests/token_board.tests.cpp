@@ -63,11 +63,13 @@ TEST_CASE("TokenBoard::clone", "[Token][Board]")
     auto newToken2{board.addToken({4U, 4U}, 4U)};
     CHECK(4U == board.get({4U, 4U})->value());
 
-    tc::TokenBoard board2{board.clone()};
+    tc::TokenBoard board2{board};
     auto newToken21{board2.get({0U, 0U})};
+    CHECK(6U == board2.get({0U, 0U})->value());
     CHECK(nullptr != newToken21);
     auto newToken22{board2.get({4U, 4U})};
     CHECK(nullptr != newToken22);
+    CHECK(4U == board2.get({4U, 4U})->value());
 
     auto newToken4{board.addToken({40U, 40U}, 40U)};
     CHECK(40U == board.get({40U, 40U})->value());
@@ -90,11 +92,37 @@ TEST_CASE("TokenBoard::copy_construct", "[Token][Board]")
 
     tc::TokenBoard board2{board};
     auto newToken21{board2.get({0U, 0U})};
+    CHECK(6U == board2.get({0U, 0U})->value());
     CHECK(nullptr != newToken21);
     auto newToken22{board2.get({4U, 4U})};
     CHECK(nullptr != newToken22);
+    CHECK(4U == board2.get({4U, 4U})->value());
 
     auto newToken4{board.addToken({40U, 40U}, 40U)};
     CHECK(40U == board.get({40U, 40U})->value());
     CHECK(nullptr == board2.get({40U, 40U}));
+}
+
+TEST_CASE("TokenBoard::copy_assign", "[Token][Board]")
+{
+    tc::TokenBoard board{64U, 64U};
+
+    auto newToken{board.addToken({0U, 0U}, 6U)};
+    CHECK(6U == board.get({0U, 0U})->value());
+    auto newToken2{board.addToken({4U, 4U}, 4U)};
+    CHECK(4U == board.get({4U, 4U})->value());
+
+    tc::TokenBoard board2{64U, 64U};
+    auto newToken21{board2.get({0U, 0U})};
+    CHECK(6U == board2.get({0U, 0U})->value());
+    CHECK(nullptr != newToken21);
+    auto newToken22{board2.get({4U, 4U})};
+    CHECK(nullptr != newToken22);
+    CHECK(4U == board2.get({4U, 4U})->value());
+
+    /*
+    auto newToken4{board.addToken({40U, 40U}, 40U)};
+    CHECK(40U == board.get({40U, 40U})->value());
+    CHECK(nullptr == board2.get({40U, 40U}));
+    */
 }

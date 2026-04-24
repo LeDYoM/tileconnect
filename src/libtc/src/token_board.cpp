@@ -28,18 +28,27 @@ public:
     TokenBoard(SizeType const x, SizeType const y) : TokenBoard{SizeTuple{x, y}}
     {}
 
-    TokenBoard(TokenBoard&&)            = default;
-    TokenBoard& operator=(TokenBoard&&) = default;
-
     TokenBoard(TokenBoard const& rhs) : TokenBoard{rhs.m_board}
     {
         updateTokenBoards(rhs.m_board);
     }
 
-    TokenBoard& operator=(TokenBoard const& rhs)
+    [[nodiscard]] TokenBoard& operator=(TokenBoard const& rhs)
     {
         *m_board = *(rhs.m_board);
         updateTokenBoards(rhs.m_board);
+        return *this;
+    }
+
+    TokenBoard(TokenBoard&& rhs) : m_board{std::move(rhs.m_board)}
+    {
+        updateTokenBoards(m_board);
+    }
+
+    [[nodiscard]] TokenBoard& operator=(TokenBoard&& rhs)
+    {
+        std::swap(m_board, rhs.m_board);
+        updateTokenBoards(m_board);
         return *this;
     }
 
