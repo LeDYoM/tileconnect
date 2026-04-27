@@ -113,6 +113,7 @@ TEST_CASE("TokenBoard::copy_assign", "[Token][Board]")
     CHECK(4U == board.get({4U, 4U})->value());
 
     tc::TokenBoard board2{64U, 64U};
+    board2 = board;
     auto newToken21{board2.get({0U, 0U})};
     CHECK(6U == board2.get({0U, 0U})->value());
     CHECK(nullptr != newToken21);
@@ -120,9 +121,7 @@ TEST_CASE("TokenBoard::copy_assign", "[Token][Board]")
     CHECK(nullptr != newToken22);
     CHECK(4U == board2.get({4U, 4U})->value());
 
-    /*
     auto newToken4{board.addToken({40U, 40U}, 40U)};
     CHECK(40U == board.get({40U, 40U})->value());
     CHECK(nullptr == board2.get({40U, 40U}));
-    */
 }

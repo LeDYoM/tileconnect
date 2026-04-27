@@ -33,7 +33,7 @@ public:
         updateTokenBoards(rhs.m_board);
     }
 
-    [[nodiscard]] TokenBoard& operator=(TokenBoard const& rhs)
+    TokenBoard& operator=(TokenBoard const& rhs)
     {
         *m_board = *(rhs.m_board);
         updateTokenBoards(rhs.m_board);
