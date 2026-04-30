@@ -227,6 +227,14 @@ public:
         return valid_coords(size.x, size.y);
     }
 
+    void clear() noexcept
+    {
+        for (auto& token : m_tokens)
+        {
+            token = nullptr;
+        }
+    }
+
     [[nodiscard]] BoardContent::const_iterator begin() const noexcept
     {
         return m_tokens.begin();

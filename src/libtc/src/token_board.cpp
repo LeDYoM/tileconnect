@@ -45,7 +45,7 @@ public:
         updateTokenBoards(m_board);
     }
 
-    [[nodiscard]] TokenBoard& operator=(TokenBoard&& rhs)
+    TokenBoard& operator=(TokenBoard&& rhs)
     {
         std::swap(m_board, rhs.m_board);
         updateTokenBoards(m_board);

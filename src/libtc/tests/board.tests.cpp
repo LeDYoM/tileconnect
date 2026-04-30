@@ -1,6 +1,8 @@
 #include "catch_include.hpp"
 
 #include <limits>
+#include <algorithm>
+
 import tile_connect;
 
 using BoardInt = tc::TBoard<int>;
@@ -420,4 +422,18 @@ TEST_CASE("Board::begin_and_end", "[Board][Token]")
     CHECK(1024 == **latest);
     auto clatest(std::prev(board32x32.cend()));
     CHECK(latest == clatest);
+}
+
+TEST_CASE("Board::clear", "[Board][Token]")
+{
+    constexpr BoardInt::SizeTuple BoardSize32x32{128U, 128U};
+    BoardInt board32x32{BoardSize32x32};
+    board32x32.emplace(0U, 0U, 56);
+    board32x32.emplace(1U, 0U, 243);
+    board32x32.emplace(127U, 127U, 1024);
+
+    board32x32.clear();
+
+    std::ranges::for_each(
+        board32x32, [](const auto& element) { CHECK(nullptr == element); });
 }
