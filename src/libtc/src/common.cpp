@@ -1,7 +1,7 @@
-export module common;
+export module tile_connect:common;
 
-import board;
-import token;
+import :board;
+import :token;
 
 namespace tc
 {

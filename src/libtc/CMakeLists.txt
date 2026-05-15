@@ -25,7 +25,7 @@ target_sources(${ctl} PRIVATE
   FILES
     src/board.cpp
     src/common.cpp
-    src/tc_module.cppm
+    src/tc_module.ixx
     src/token_board.cpp
     src/token.cpp
 )

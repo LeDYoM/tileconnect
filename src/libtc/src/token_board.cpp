@@ -2,11 +2,11 @@ module;
 
 #include "tc_export.hpp"
 
-export module token_board;
+export module tile_connect:token_board;
 
 import <memory>;
-import token;
-import board;
+import :token;
+import :board;
 
 namespace tc
 {

@@ -1,4 +1,4 @@
-export module board;
+export module tile_connect:board;
 
 import <vector>;
 import <memory>;

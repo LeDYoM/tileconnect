@@ -1,7 +1,8 @@
-export module token;
+export module tile_connect:token;
+
 
 import <memory>;
-import board;
+import :board;
 
 namespace tc
 {
