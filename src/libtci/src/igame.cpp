@@ -1,16 +1,24 @@
+module;
+
+#include "tci_export.hpp"
+
 export module tile_connect_interface:igame;
 
 import :ievent;
 
-namespace tc::interf
+namespace tc::tci
 {
-    export class IGame
-    {
-    public:
-        virtual char const* const name() const noexcept = 0;
+export class TCI_CLASS_API IGame
+{
+public:
+    IGame() = default;
+    virtual char const* name() const noexcept = 0;
 
-        virtual void onEvent();
+    virtual void onEvent(IEvent const& event) noexcept = 0;
 
-        virtual ~IGame() {}
-    };
-}  // namespace tc: interf
+    IGame(IGame const&) = default;
+    IGame& operator=(IGame const&) = default;
+
+    virtual ~IGame() {}
+};
+}  // namespace tc::tci

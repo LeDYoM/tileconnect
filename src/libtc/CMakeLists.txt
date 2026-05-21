@@ -36,6 +36,8 @@ target_sources(${ctl} PUBLIC
     src/tc_export.hpp
 )
 
+#set(EXPORT_API_ONLY TRUE)
+
 if(NOT DEFINED EXPORT_API_ONLY)
   set_target_properties(${ctl} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS true)
   target_compile_definitions(${ctl} PRIVATE tc_EXPORT_ALL)
