@@ -9,6 +9,8 @@ project(
 
 set(ctl tc)
 
+#set(EXPORT_API_ONLY TRUE)
+
 if(DEFINED EXPORT_API_ONLY)
   message("Export API ONLY: YES")
   set(TC_BUILD_TESTS OFF)
@@ -23,6 +25,7 @@ set_project_options(${ctl})
 target_sources(${ctl} PRIVATE
   FILE_SET CXX_MODULES
   FILES
+    src/game_management/game_loader.cpp
     src/board.cpp
     src/common.cpp
     src/tc_module.ixx
@@ -36,8 +39,6 @@ target_sources(${ctl} PUBLIC
     src/tc_export.hpp
 )
 
-#set(EXPORT_API_ONLY TRUE)
-
 if(NOT DEFINED EXPORT_API_ONLY)
   set_target_properties(${ctl} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS true)
   target_compile_definitions(${ctl} PRIVATE tc_EXPORT_ALL)
@@ -45,3 +46,12 @@ if(NOT DEFINED EXPORT_API_ONLY)
 else()
   target_compile_definitions(${ctl} PRIVATE tc_EXPORT)
 endif()
+
+include(FetchContent)
+
+FetchContent_Declare(
+  agloader
+  URL "agloader.zip"
+)
+
+FetchContent_MakeAvailable(agloader)
