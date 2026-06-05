@@ -51,7 +51,9 @@ include(FetchContent)
 
 FetchContent_Declare(
   agloader
-  URL "agloader.zip"
+  GIT_REPOSITORY https://github.com/LeDYoM/agloader.git
+  GIT_TAG main
 )
 
 FetchContent_MakeAvailable(agloader)
+target_link_libraries(${ctl} PRIVATE agloader)

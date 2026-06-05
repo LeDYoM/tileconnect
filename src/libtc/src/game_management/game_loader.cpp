@@ -1,5 +1,6 @@
 export module tile_connect:game_loader;
 
+import <string>;
 import agloader;
 
 namespace tc::gm
