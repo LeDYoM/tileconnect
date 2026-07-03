@@ -49,11 +49,13 @@ endif()
 
 include(FetchContent)
 
+message("Fetching agloader")
 FetchContent_Declare(
   agloader
   GIT_REPOSITORY https://github.com/LeDYoM/agloader.git
   GIT_TAG main
 )
-
 FetchContent_MakeAvailable(agloader)
+message("agloader fetched and ready")
+
 target_link_libraries(${ctl} PRIVATE agloader)
